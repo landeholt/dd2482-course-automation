@@ -7,6 +7,9 @@ charset-normalizer==2.0.12; python_full_version >= "3.6.0" and python_version >=
 idna==3.3; python_version >= "3.5" and python_full_version < "3.0.0" or python_full_version >= "3.6.0" and python_version >= "3.5" \
     --hash=sha256:84d9dd047ffa80596e0f246e2eab0b391788b0503584e8945f2368256d2735ff \
     --hash=sha256:9d643ff0a55b762d5cdb124b8eaa99c66322e2157b69160bc32796e824360e6d
+pytz==2022.1 \
+    --hash=sha256:e68985985296d9a66a881eb3193b0906246245294a881e7c8afe623866ac6a5c \
+    --hash=sha256:1e760e2fe6a8163bc0b3d9a19c4f84342afa0a2affebfaa84b01b978a02ecaa7
 requests==2.27.1; (python_version >= "2.7" and python_full_version < "3.0.0") or (python_full_version >= "3.6.0") \
     --hash=sha256:f22fa1e554c9ddfd16e6e41ac79759e17be9e492b3587efa038054674760e72d \
     --hash=sha256:68d7c56fd5a8999887728ef304a6d12edc7be74f1cfa47714fc8b414525c9a61
