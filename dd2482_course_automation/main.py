@@ -8,16 +8,15 @@
 
 import argparse
 from datetime import datetime
-from email import header
 import logging
 from pathlib import Path
 import re
-from typing import Any, Optional, Union, cast
+from typing import Any, Optional, cast
 import sys
 import json
 import requests
 
-from .exceptions import AfterDeadlineError, AmbiguousRepoError, MissingRepoError, PrivateRepoError, UnclearPullRequest
+from exceptions import AfterDeadlineError, AmbiguousRepoError, MissingRepoError, PrivateRepoError, UnclearPullRequest
 
 Payload = dict[str, Any]
 GITHUB_URL = re.compile(r"https:\/\/(?:www\.)?github\.com\/([^\/]+)\/([\w\d\-\_]+)")
@@ -222,9 +221,9 @@ def run(args: dict[str, str]):
 
 def cli():
     parser = argparse.ArgumentParser(description="automatic course-automation evaluator")
-    parser.add_argument('-d', action="store_const", type=str, help="Deadline for the first task in the course")
-    parser.add_argument('-e', action="store_const", type=str, help="Event path")
-    parser.add_argument('-s', action="store_const", type=str, help="Github secret")
+    parser.add_argument('-d', action="store_const",required=True,const=None,help="Deadline for the first task in the course")
+    parser.add_argument('-e', action="store_const",required=True,const=None,help="Event path")
+    parser.add_argument('-s', action="store_const",required=True,const=None,help="Github secret")
     
     args = parser.parse_args()
     args = vars(args)

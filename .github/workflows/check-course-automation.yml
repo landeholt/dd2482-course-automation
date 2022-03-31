@@ -1,0 +1,23 @@
+name: "Mandatory part(s): course-automation"
+
+on:
+  pull_request:
+    paths:
+      - 'contributions/course-automation/*/*.md'
+
+env:
+  DEADLINE: 2022-04-05T17:00:00Z
+
+jobs:
+  check-pull-request:
+    runs-on: 'ubuntu-latest'
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.9.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.9.10"
+        cache: 'pip'
+    - run: pip install -r requirements.txt
+    - name: 'Parsing markdown for mandatory part(s)'
+      run: "python dd2482_course_automation -d=${{ env.DEADLINE }} -e=${{ github.event_path }} -s=${{ secrets.GITHUB_TOKEN }}"
