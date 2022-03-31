@@ -14,7 +14,7 @@ from exceptions import AfterDeadlineError, AmbiguousRepoError, MissingRepoError,
 Payload = dict[str, Any]
 GITHUB_URL = re.compile(r"https:\/\/(?:www\.)?github\.com\/([^\/]+)\/([\w\d\-\_]+)")
 # propose, proposal, final, final submission
-STAGE_PATTERN = re.compile(r"\#.+(final|proposal).*")
+STAGE_PATTERN = re.compile(r"\#.+(final|proposal|submission).*")
 
 DATETIME_FORMAT = "%m/%d/%Y %H:%M:%S"
 
