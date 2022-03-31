@@ -214,10 +214,10 @@ def give_feedback(payload: Payload, secret: Optional[str], error_message: Option
     
     def format_body():
         repos = result["repos"]
+        if len(repos) == 0:
+            repos.append("No repos found..")  # type: ignore
         created_at = result["created_at"]
-        stage = result["stage"]
         decision_message = "\n---\n\nDecision is based on the following findings:\n\n"
-        decision_message += f"stage: ...{stage}...\n"
         decision_message += f"created_at: {created_at}\n"
         decision_message += f"repos:\n"
         decision_message += '\n'.join(map(lambda x : '\t- ' + x,repos))
