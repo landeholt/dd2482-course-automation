@@ -68,6 +68,7 @@ def get_body(payload: Payload) -> str:
     
     def get(filename: str):
         _, repo, __, branch = get_meta_details(payload)
+        logger.warn(" ".join([repo, branch, filename]))
         return requests.get(f"https://raw.githubusercontent.com/{repo}/{branch}/{filename}").text.lower()
     
     def keep_markdown():
@@ -79,7 +80,6 @@ def get_body(payload: Payload) -> str:
         raise FileNotFoundError("Pull request did not have any committed files")
     first = kept_files[0]
     
-    logger.error(first[1])
     return first[1]
     
     
