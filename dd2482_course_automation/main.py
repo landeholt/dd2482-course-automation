@@ -68,7 +68,7 @@ def get_body(payload: Payload) -> str:
     
     def get(filename: str):
         _, repo, __, branch = get_meta_details(payload)
-        return requests.get(f"https://raw.githubusercontent.com/{repo}/{branch}/{filename}").text
+        return requests.get(f"https://raw.githubusercontent.com/{repo}/{branch}/{filename}").text.lower()
     
     def keep_markdown():
         return reduce(lambda acc, file_ : acc + [(file_["filename"],get(file_["filename"]))] if file_["filename"].endswith(".md") and file_["status"] != "removed" else acc, files, [])
