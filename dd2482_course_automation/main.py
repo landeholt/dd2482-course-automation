@@ -79,7 +79,7 @@ def get_body(payload: Payload) -> str:
         raise FileNotFoundError("Pull request did not have any committed files")
     first = kept_files[0]
     
-    logger.info(first[1])
+    logger.error(first[1])
     return first[1]
     
     
