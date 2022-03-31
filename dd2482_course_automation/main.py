@@ -12,7 +12,7 @@ import requests
 from exceptions import AfterDeadlineError, AmbiguousRepoError, MissingRepoError, PrivateRepoError, UnclearPullRequest
 
 Payload = dict[str, Any]
-GITHUB_URL = re.compile(r"https:\/\/(?:www\.)?github\.com\/([^\/(?:kth)]+)\/([\w\d\-\_]+)")
+GITHUB_URL = re.compile(r"https:\/\/(?:www\.)?github\.com\/([^\/]+)\/([\w\d\-\_]+)")
 # propose, proposal, final, final submission
 STAGE_PATTERN = re.compile(r"(propos(?:e|al)|(?:final(?: submission)?|submission))")
 PROPOSAL = re.compile(r"(propos(?:e|al))")
@@ -85,7 +85,7 @@ def get_meta_details(payload: Payload):
     return owner, repo, sha, ref
     
 
-def get_repo_urls(body: str) -> list[tuple[str, str]]:
+def get_repos(body: str) -> list[tuple[str, str]]:
     return GITHUB_URL.findall(body)
     
 
@@ -153,9 +153,9 @@ def validate(deadline: datetime, payload: Payload, secret: Optional[str] = None)
         payload["__result__"]["stage"] = found_stage
     
     # 2. PR readme.md must have url to remote repo.
-    repo_urls = get_repo_urls(body)
+    repos = get_repos(body)
     
-    if len(repo_urls) == 0:
+    if len(repos) == 0:
         raise MissingRepoError("No remote repository url found in provided pull request. Please provide one, or clearly state in your pull request that it is only a proposal.")
     
     # 3. PR readme.md must state whether it is a proposal or submission
@@ -164,10 +164,10 @@ def validate(deadline: datetime, payload: Payload, secret: Optional[str] = None)
     
     
     # 4. PR readme.md must have public repos
-    for repo in repo_urls:
+    for repo in repos:
         check_repo(repo, secret)
     
-    payload["__result__"]["repos"] += list(map(lambda x : x[1], repo_urls))
+    payload["__result__"]["repos"] += list(map(lambda x : x[1], repos))
 
 
 def give_feedback(payload: Payload, secret: Optional[str], error_message: Optional[str] = None):
