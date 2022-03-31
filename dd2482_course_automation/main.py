@@ -12,7 +12,7 @@ import requests
 from exceptions import AfterDeadlineError, AmbiguousRepoError, MissingRepoError, PrivateRepoError, UnclearPullRequest
 
 Payload = dict[str, Any]
-GITHUB_URL = re.compile(r"https:\/\/(?:www\.)?github\.com\/(([^\/(?:KTH)])+)\/([\w\d\-\_]+)")
+GITHUB_URL = re.compile(r"https:\/\/(?:www\.)?github\.com\/([^\/(?:kth)]+)\/([\w\d\-\_]+)")
 # propose, proposal, final, final submission
 STAGE_PATTERN = re.compile(r"(propos(?:e|al)|(?:final(?: submission)?|submission))")
 PROPOSAL = re.compile(r"(propos(?:e|al))")
@@ -86,15 +86,8 @@ def get_meta_details(payload: Payload):
     
 
 def get_repo_urls(body: str) -> list[tuple[str, str]]:
-    partials = GITHUB_URL.findall(body)
-    logger.warning(str(partials))
-    result = []
-    for r in partials:
-        match = GITHUB_URL.match(r)
-        if match:
-            owner, repo = match.groups()
-            result.append((owner, repo))
-    return result
+    return GITHUB_URL.findall(body)
+    
 
 def get_stage(body: str):
     result = list(set(STAGE_PATTERN.findall(body)))
