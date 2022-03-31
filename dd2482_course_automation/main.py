@@ -14,9 +14,7 @@ from exceptions import AfterDeadlineError, AmbiguousRepoError, MissingRepoError,
 Payload = dict[str, Any]
 GITHUB_URL = re.compile(r"https:\/\/(?:www\.)?github\.com\/([^\/]+)\/([\w\d\-\_]+)")
 # propose, proposal, final, final submission
-STAGE_PATTERN = re.compile(r"(propos(?:e|al)|(?:final(?: submission)?|submission))")
-PROPOSAL = re.compile(r"(propos(?:e|al))")
-FINAL = re.compile(r"(final(?: submission)?|submission)")
+STAGE_PATTERN = re.compile(r"^\#.+(final|proposal).*$")
 
 DATETIME_FORMAT = "%m/%d/%Y %H:%M:%S"
 
@@ -94,16 +92,13 @@ def get_repos(body: str) -> list[tuple[str, str]]:
     
 
 def get_stage(body: str):
-    result = list(set(STAGE_PATTERN.findall(body)))
-    # first instance is weighted to be most important
-    # this selection is bound to fail. Better solution must be mandated.
-    logger.warning(str(result))
-    if len(result) == 0:
-        return None
-    first = result[0]
-    if FINAL.match(first):
-        return "final_submission"
-    return "proposal"
+    match = STAGE_PATTERN.search(body)
+    if not match:
+        return False, None
+    is_final = "final" in match.group(0)
+    
+    window = body[max(match.start(0) - 10,0):min(match.end(0) + 10, len(body))]
+    return is_final, window
 
 def get_issue_number(payload: Payload):
     pr = get_pull_request(payload)
@@ -140,7 +135,7 @@ def check_repo(repo, secret):
 
 def validate(deadline: datetime, payload: Payload, secret: Optional[str] = None):
     
-    payload["__result__"] = {"stage": "proposal", "repos": [], "created_at": None}
+    payload["__result__"] = {"is_final": False, "stage": None, "repos": [], "created_at": None}
     
     
     # 1. Validate that PR is created before deadline
@@ -157,15 +152,16 @@ def validate(deadline: datetime, payload: Payload, secret: Optional[str] = None)
     
     body = get_body(payload)
     
-    found_stage = get_stage(body)
+    is_final, found_stage = get_stage(body)
     if found_stage:
         payload["__result__"]["stage"] = found_stage
+        payload["__result__"]["is_final"] = is_final
     
     # 2. PR readme.md must have url to remote repo.
     repos = get_repos(body)
     payload["__result__"]["repos"] += list(map(lambda x : x[1], repos))
         
-    if len(repos) == 0:
+    if len(repos) == 0 and is_final:
         raise MissingRepoError("No remote repository url found in provided pull request. Please provide one, or clearly state in your pull request that it is only a proposal.")
     
     # 3. PR readme.md must state whether it is a proposal or submission
@@ -221,7 +217,7 @@ def give_feedback(payload: Payload, secret: Optional[str], error_message: Option
         created_at = result["created_at"]
         stage = result["stage"]
         decision_message = "\n---\n\nDecision is based on the following findings:\n\n"
-        decision_message += f"stage: {stage}\n"
+        decision_message += f"stage: ...{stage}...\n"
         decision_message += f"created_at: {created_at}\n"
         decision_message += f"repos:\n"
         decision_message += '\n'.join(map(lambda x : '\t- ' + x,repos))
@@ -237,7 +233,8 @@ def give_feedback(payload: Payload, secret: Optional[str], error_message: Option
     labels = ["course_automation"]
     
     if status != "failure":
-        labels.append(result["stage"])
+        stage = "final_submission" if result["is_final"] else "proposal"
+        labels.append(stage)
     
     
     set_labels(labels)
