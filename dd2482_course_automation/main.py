@@ -178,7 +178,7 @@ def validate(deadline: datetime, payload: Payload, secret: Optional[str] = None)
 def give_feedback(payload: Payload, secret: Optional[str], error_message: Optional[str] = None):
     
     result: dict[str, str] = payload["__result__"]
-    
+    stage = "final_submission" if result["is_final"] else "proposal"
     
     if not secret:
         raise ValueError("No provided github secret")
@@ -191,8 +191,8 @@ def give_feedback(payload: Payload, secret: Optional[str], error_message: Option
         owner, repo, *_ = get_meta_details(payload)
         url = f"https://api.github.com/repos/{owner}/{repo}/issues/{issue_number}/labels"
         json_ = {"labels": labels}
-        log("[POST::LABELS]: " + str(json_))
-        return requests.post(url=url,headers=headers,json=json_)
+        log("[PUT::LABELS]: " + str(json_))
+        return requests.put(url=url,headers=headers,json=json_).json()
     
 
     def set_status(status: str, description: str, target_url: Optional[str] = None):
@@ -218,6 +218,8 @@ def give_feedback(payload: Payload, secret: Optional[str], error_message: Option
             repos.append("No repos found..")  # type: ignore
         created_at = result["created_at"]
         decision_message = "\n---\n\nDecision is based on the following findings:\n\n"
+        decision_message += f'assumed stage: `{stage}`'
+        decision_message += f'found the following in the readme:\n\t ```md\n{result["stage"]}```'
         decision_message += f"created_at: {created_at}\n"
         decision_message += f"repos:\n"
         decision_message += '\n'.join(map(lambda x : '\t- ' + x,repos))
@@ -233,7 +235,6 @@ def give_feedback(payload: Payload, secret: Optional[str], error_message: Option
     labels = ["course_automation"]
     
     if status != "failure":
-        stage = "final_submission" if result["is_final"] else "proposal"
         labels.append(stage)
     
     
