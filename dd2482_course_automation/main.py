@@ -101,6 +101,7 @@ def get_repo_urls(body: str) -> list[str]:
     return list(set(GITHUB_URL.findall(body)))
 
 def get_stage(body: str):
+    logger.warning(body)
     result = list(set(STAGE_PATTERN.findall(body)))
     # first instance is weighted to be most important
     # this selection is bound to fail. Better solution must be mandated.
