@@ -8,6 +8,7 @@
 
 import argparse
 from datetime import datetime
+from functools import reduce
 import logging
 from pathlib import Path
 import re
@@ -48,18 +49,44 @@ def get_comments_url(payload: Payload) -> str:
     pr = get_pull_request(payload)
     return pr.get("comments_url")
 
-def get_body(payload: Payload) -> str:
+def get_pull_request_files(payload: Payload) -> list[Payload]:
     pr = get_pull_request(payload)
-    return pr.get("body", "")
+    url = pr["url"] + "/files"
+    return requests.get(url=url).json()
+
+def get_body(payload: Payload) -> str:
+    
+    files = get_pull_request_files(payload)
+    
+    def get(filename: str):
+        _, repo, __, branch = get_meta_details(payload)
+        return requests.get(f"https://raw.githubusercontent.com/{repo}/{branch}/{filename}").text
+    
+    def keep_markdown():
+        return reduce(lambda acc, file_ : acc + [(file_["filename"],get(file_["filename"]))] if file_["filename"].endswith(".md") and file_["status"] != "removed" else acc, files, [])
+    
+    kept_files: list[tuple[str,str]] = keep_markdown()
+    
+    if len(kept_files) == 0:
+        raise FileNotFoundError("Pull request did not have any committed files")
+    first = kept_files[0]
+    
+    return first[1]
+    
+    
+    
+    
+    
 
 def get_meta_details(payload: Payload):
     pr = get_pull_request(payload)
     repository = cast(Payload,payload.get("repository"))
     head = cast(Payload, pr.get("head"))
+    ref = head.get("ref")
     sha = head.get("sha")
     repo = repository.get("name")
     owner: str = cast(Payload,repository.get("owner"))["login"]
-    return owner, repo, sha
+    return owner, repo, sha, ref
     
 
 def get_repo_urls(body: str) -> list[str]:
@@ -156,7 +183,7 @@ def give_feedback(payload: Payload, secret: Optional[str], error_message: Option
 
     def set_labels(labels: list[str]):
         issue_number = get_issue_number(payload)
-        owner, repo, _ = get_meta_details(payload)
+        owner, repo, *_ = get_meta_details(payload)
         url = f"https://api.github.com/repos/{owner}/{repo}/issues/{issue_number}/labels"
         json_ = {"labels": labels}
         log("[POST::LABELS]: " + str(json_))
@@ -164,7 +191,7 @@ def give_feedback(payload: Payload, secret: Optional[str], error_message: Option
     
 
     def set_status(status: str, description: str, target_url: Optional[str] = None):
-        owner, repo, sha = get_meta_details(payload)
+        owner, repo, sha, _ = get_meta_details(payload)
         url = f"https://api.github.com/repos/{owner}/{repo}/statuses/{sha}"
         json_ = {'status': status, 'description': description, 'context': 'Check mandatory part(s)'}
         if target_url:
