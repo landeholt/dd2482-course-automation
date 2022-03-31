@@ -20,7 +20,7 @@ Course Automation
 
 1111111111111
 https://github.com/landeholt/dd2482-course-automation
-In order to alleviate __redundant work__ for this course TAs I propose to automate verification of the following mandatory parts for ["course-automation"](https://github.com/kth/devops-coursse):
+In order to alleviate __redundant work__ for this course TAs I propose to automate verification of the following mandatory parts for ["course-automation"](https://github.com/kth/devops-course):
 
 -   timeliness: the automation is done before the __first task__ deadline (in order to be useful for the course)
         The first task deadline should be a set as a variable that can be changed for each year. If the final pull request to this repo is after __first task__, the pull request should become invalid.
