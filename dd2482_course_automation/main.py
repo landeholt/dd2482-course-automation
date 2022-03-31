@@ -22,9 +22,9 @@ from exceptions import AfterDeadlineError, AmbiguousRepoError, MissingRepoError,
 Payload = dict[str, Any]
 GITHUB_URL = re.compile(r"https:\/\/(?:www\.)?github\.com\/([^\/]+)\/([\w\d\-\_]+)")
 # propose, proposal, final, final submission
-STAGE_PATTERN = re.compile(r"(propos(?:e|al)|final(?: submission)?)")
+STAGE_PATTERN = re.compile(r"(propos(?:e|al)|(?:final(?: submission)?|submission))")
 PROPOSAL = re.compile(r"(propos(?:e|al))")
-FINAL = re.compile(r"(final(?: submission)?)")
+FINAL = re.compile(r"(final(?: submission)?|submission)")
 
 DATETIME_FORMAT = "%m/%d/%Y %H:%M:%S"
 
@@ -68,7 +68,6 @@ def get_body(payload: Payload) -> str:
     
     def get(filename: str):
         owner, repo, __, branch = get_meta_details(payload)
-        logger.warn(" ".join([repo, branch, filename]))
         return requests.get(f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{filename}").text.lower()
     
     def keep_markdown():
