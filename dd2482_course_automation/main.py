@@ -85,11 +85,17 @@ def get_meta_details(payload: Payload):
     return owner, repo, sha, ref
     
 
-def get_repo_urls(body: str) -> list[str]:
-    return list(set(GITHUB_URL.findall(body)))
+def get_repo_urls(body: str) -> list[tuple[str, str]]:
+    partials = GITHUB_URL.findall(body)
+    result = []
+    for r in partials:
+        match = GITHUB_URL.match(r)
+        if match:
+            owner, repo = match.groups()
+            result.append((owner, repo))
+    return result
 
 def get_stage(body: str):
-    logger.warning(body)
     result = list(set(STAGE_PATTERN.findall(body)))
     # first instance is weighted to be most important
     # this selection is bound to fail. Better solution must be mandated.
@@ -124,7 +130,7 @@ def get_args(args: dict[str, str]) -> tuple[datetime, Payload, Optional[str]]:
        
 
 def check_repo(repo, secret):
-    owner, repo_name = repo
+    owner, repo_name, = repo
     
     repo = get_repo(owner, repo_name, secret)
     is_private = repo.get("private", True)
@@ -135,7 +141,7 @@ def check_repo(repo, secret):
 
 def validate(deadline: datetime, payload: Payload, secret: Optional[str] = None):
     
-    payload["__result__"] = {"stage": "proposal", "urls": [], "created_at": None}
+    payload["__result__"] = {"stage": "proposal", "repos": [], "created_at": None}
     
     
     # 1. Validate that PR is created before deadline
@@ -166,7 +172,7 @@ def validate(deadline: datetime, payload: Payload, secret: Optional[str] = None)
     for repo in repo_urls:
         check_repo(repo, secret)
     
-    payload["__result__"]["urls"] += repo_urls
+    payload["__result__"]["repos"] += list(map(lambda x : x[1], repo_urls))
 
 
 def give_feedback(payload: Payload, secret: Optional[str], error_message: Optional[str] = None):
@@ -207,14 +213,14 @@ def give_feedback(payload: Payload, secret: Optional[str], error_message: Option
         return requests.post(url=url,headers=headers,json=json_).json()
     
     def format_body():
-        urls = result["urls"]
+        repos = result["repos"]
         created_at = result["created_at"]
         stage = result["stage"]
         decision_message = "\n---\n\nDecision is based on the following findings:\n\n"
         decision_message += f"stage: {stage}\n"
         decision_message += f"created_at: {created_at}\n"
-        decision_message += f"urls:\n"
-        decision_message += '\n'.join(map(lambda x : '\t- ' + x,urls))
+        decision_message += f"repos:\n"
+        decision_message += '\n'.join(map(lambda x : '\t- ' + x,repos))
         if error_message:
             return error_message +  decision_message
         return "All mandatory parts where found. Awaiting TA for final judgement." + decision_message
