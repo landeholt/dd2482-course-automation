@@ -77,9 +77,9 @@ def get_body(payload: Payload) -> str:
     
     if len(kept_files) == 0:
         raise FileNotFoundError("Pull request did not have any committed files")
-    first = kept_files[0]
-    logger.warning(str(first))
-    return first[1]
+    
+    blob = '---'.join(map(lambda x : x[1], kept_files))
+    return blob
     
 
 def get_meta_details(payload: Payload):
