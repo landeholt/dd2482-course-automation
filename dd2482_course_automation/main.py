@@ -95,7 +95,7 @@ def get_stage(body: str):
     match = STAGE_PATTERN.search(body)
     if not match:
         return False, None
-    is_final = "final" in match.group(0)
+    is_final = "proposal" not in match.group(0)
     
     window = body[max(match.start(0) - 10,0):min(match.end(0) + 10, len(body))]
     return is_final, window
