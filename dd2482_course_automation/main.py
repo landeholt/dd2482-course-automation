@@ -1,11 +1,3 @@
-# 1. check date
-# 2. check for readme / pull request body
-# 3. check for github.com url
-# 4. extract owner, repo
-# 5. check if public
-# 6. feedback
-
-
 import argparse
 from datetime import datetime
 import pytz
@@ -20,7 +12,7 @@ import requests
 from exceptions import AfterDeadlineError, AmbiguousRepoError, MissingRepoError, PrivateRepoError, UnclearPullRequest
 
 Payload = dict[str, Any]
-GITHUB_URL = re.compile(r"https:\/\/(?:www\.)?github\.com\/([^\/]+)\/([\w\d\-\_]+)")
+GITHUB_URL = re.compile(r"https:\/\/(?:www\.)?github\.com\/(([^\/(?:KTH)])+)\/([\w\d\-\_]+)")
 # propose, proposal, final, final submission
 STAGE_PATTERN = re.compile(r"(propos(?:e|al)|(?:final(?: submission)?|submission))")
 PROPOSAL = re.compile(r"(propos(?:e|al))")
@@ -107,7 +99,6 @@ def get_stage(body: str):
     if FINAL.match(first):
         return "final_submission"
     return "proposal"
-    
 
 def get_issue_number(payload: Payload):
     pr = get_pull_request(payload)
@@ -130,55 +121,58 @@ def get_args(args: dict[str, str]) -> tuple[datetime, Payload, Optional[str]]:
         return parse_datetime_str(d), get_payload(Path(e)), s
     except Exception as exc:
         raise exc
-        
-    
+       
 
-def validate(deadline: datetime, payload: Payload, secret: Optional[str] = None):
-    
-    payload["__result__"] = {"stage": "proposal"}
-    
-    created_at = get_created_at(payload)
-    if created_at > deadline:
-        raise AfterDeadlineError(f"Pull request after deadline: {deadline}")
-    
-    body = get_body(payload)
-    
-    stage = get_stage(body)
-    is_final = False
-    if stage:
-        payload["__result__"]["stage"] = stage
-        is_final = payload["__result__"]["stage"] == "final_submission"
-    
-    
-    repo_urls = get_repo_urls(body)
-    if len(repo_urls) == 0 and is_final:
-        raise MissingRepoError("No repository url found in provided pull request. Please provide one, or clearly state in your pull request that it is only a proposal.")
-    
-    elif len(repo_urls) == 0 and not stage:
-        # when stage is not explictly defined
-        raise UnclearPullRequest("Cannot evaluate whether PR is final submission or proposal. Please state it explicitly in your PR")
-    elif len(repo_urls) == 1 and not is_final and stage:
-        # explicitly proposal
-        return
-    elif len(repo_urls) == 1 and not stage:
-        # when unexplictly final_submission
-        is_final = True
-        payload["__result__"]["stage"] = "final_submission"
-        
-    elif len(repo_urls) > 1:
-        raise AmbiguousRepoError("More than one repo was provided in the pull request")
-    
-    
-    owner, repo_name = repo_urls[0]
+def check_repo(repo, secret):
+    owner, repo_name = repo
     
     repo = get_repo(owner, repo_name, secret)
     is_private = repo.get("private", True)
     
     if is_private:
         raise PrivateRepoError("Provided repo is not public")
+    
+
+def validate(deadline: datetime, payload: Payload, secret: Optional[str] = None):
+    
+    payload["__result__"] = {"stage": "proposal", "urls": [], "created_at": None}
+    
+    
+    # 1. Validate that PR is created before deadline
+    
+    created_at = get_created_at(payload)
+    if created_at > deadline:
+        raise AfterDeadlineError(f"Pull request after deadline: {deadline}")
+    
+    payload["__result__"]["created_at"] = created_at
+    
+    body = get_body(payload)
+    
+    found_stage = get_stage(body)
+    if found_stage:
+        payload["__result__"]["stage"] = found_stage
+    
+    # 2. PR readme.md must have url to remote repo.
+    repo_urls = get_repo_urls(body)
+    if len(repo_urls) == 0:
+        raise MissingRepoError("No remote repository url found in provided pull request. Please provide one, or clearly state in your pull request that it is only a proposal.")
+    
+    # 3. PR readme.md must state whether it is a proposal or submission
+    if not found_stage:
+        raise UnclearPullRequest("Cannot find whether PR is __final submission__ or __proposal__. Please state it explicitly in your PR. Preferably as the title.")
+    
+    
+    # 4. PR readme.md must have public repos
+    for repo in repo_urls:
+        check_repo(repo, secret)
+    
+    payload["__result__"]["urls"] += repo_urls
 
 
 def give_feedback(payload: Payload, secret: Optional[str], error_message: Optional[str] = None):
+    
+    result: dict[str, str] = payload["__result__"]
+    
     
     if not secret:
         raise ValueError("No provided github secret")
@@ -212,11 +206,22 @@ def give_feedback(payload: Payload, secret: Optional[str], error_message: Option
         log("[POST::PR-COMMENT]: " + str(json_))
         return requests.post(url=url,headers=headers,json=json_).json()
     
-    result: dict[str, str] = payload["__result__"]
+    def format_body():
+        urls = result["urls"]
+        created_at = result["created_at"]
+        stage = result["stage"]
+        decision_message = "\n---\n\nDecision is based on the following findings:\n\n"
+        decision_message += f"urls: {'\n'.join(map(lambda x : '\t- ' + x,urls))}\n"
+        decision_message += f"created_at: {created_at}\n"
+        decision_message += f"stage: {stage}\n"
+        if error_message:
+            return error_message +  decision_message
+        return "All mandatory parts where found. Awaiting TA for final judgement." + decision_message
+    
         
     status = 'failure' if error_message else "success"
     description = 'Validation failed' if error_message else "Validation successful"
-    body = error_message or "All mandatory parts where found. Awaiting TA for final judgement."
+    body = format_body()
     
     labels = ["course_automation"]
     
@@ -242,7 +247,7 @@ def run(args: dict[str, str]):
         give_feedback(payload, secret)
     
     except Exception as exc:
-        message = " ".join(exc.args)
+        message = "Error: " + " ".join(exc.args)
         
         logger.error(message)
         give_feedback(payload, secret, error_message=message)
