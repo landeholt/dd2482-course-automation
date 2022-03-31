@@ -35,7 +35,7 @@ def parse_datetime_str(raw_datetime: str):
     try:
         return pytz.utc.localize(datetime.strptime(raw_datetime, DATETIME_FORMAT))
     except Exception:
-        return pytz.utc.localize(datetime.strptime(raw_datetime, "%Y-%m-%dT%H:%M:%S%z"))
+        return datetime.strptime(raw_datetime, "%Y-%m-%dT%H:%M:%S%z")
         
 
 
