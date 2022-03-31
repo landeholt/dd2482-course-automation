@@ -25,8 +25,8 @@ GITHUB_URL = re.compile(r"https:\/\/(?:www\.)?github\.com\/([^\/]+)\/([\w\d\-\_]
 STAGE_PATTERN = re.compile(r"(propos(?:e|al)|final(?: submission)?)")
 PROPOSAL = re.compile(r"(propos(?:e|al))")
 FINAL = re.compile(r"(final(?: submission)?)")
-# 2019-05-15T15:20:33Z
-DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
+
+DATETIME_FORMAT = "%m/%d/%Y %H:%M:%S"
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +53,10 @@ def get_pull_request_files(payload: Payload) -> list[Payload]:
     pr = get_pull_request(payload)
     url = pr["url"] + "/files"
     return requests.get(url=url).json()
+
+def get_pr_body(payload: Payload) -> str:
+    pr = get_pull_request(payload)
+    return pr.get("body", "")
 
 def get_body(payload: Payload) -> str:
     
@@ -248,12 +252,12 @@ def run(args: dict[str, str]):
 
 def cli():
     parser = argparse.ArgumentParser(description="automatic course-automation evaluator")
-    parser.add_argument('-d', action="store_const",required=True,const=None,help="Deadline for the first task in the course")
-    parser.add_argument('-e', action="store_const",required=True,const=None,help="Event path")
-    parser.add_argument('-s', action="store_const",required=True,const=None,help="Github secret")
-    
+    parser.add_argument('--deadline', dest="d",help="Deadline for the first task in the course")
+    parser.add_argument('--event', dest="e",help="Event path")
+    parser.add_argument('--secret', dest="s",help="Github secret")
     args = parser.parse_args()
     args = vars(args)
+    
     
     run(args)
     
