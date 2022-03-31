@@ -18,7 +18,7 @@ Course Automation
 
 ## Description
 
-1
+11
 
 In order to alleviate __redundant work__ for this course TAs I propose to automate verification of the following mandatory parts for ["course-automation"](#):
 
