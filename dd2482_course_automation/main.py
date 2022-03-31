@@ -211,9 +211,10 @@ def give_feedback(payload: Payload, secret: Optional[str], error_message: Option
         created_at = result["created_at"]
         stage = result["stage"]
         decision_message = "\n---\n\nDecision is based on the following findings:\n\n"
-        decision_message += f"urls: {'\n'.join(map(lambda x : '\t- ' + x,urls))}\n"
-        decision_message += f"created_at: {created_at}\n"
         decision_message += f"stage: {stage}\n"
+        decision_message += f"created_at: {created_at}\n"
+        decision_message += f"urls:\n"
+        decision_message += '\n'.join(map(lambda x : '\t- ' + x,urls))
         if error_message:
             return error_message +  decision_message
         return "All mandatory parts where found. Awaiting TA for final judgement." + decision_message
