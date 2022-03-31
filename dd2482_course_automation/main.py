@@ -87,6 +87,7 @@ def get_meta_details(payload: Payload):
 
 def get_repo_urls(body: str) -> list[tuple[str, str]]:
     partials = GITHUB_URL.findall(body)
+    logger.warning(str(partials))
     result = []
     for r in partials:
         match = GITHUB_URL.match(r)
@@ -161,7 +162,6 @@ def validate(deadline: datetime, payload: Payload, secret: Optional[str] = None)
     # 2. PR readme.md must have url to remote repo.
     repo_urls = get_repo_urls(body)
     
-    logger.warning(str(repo_urls))
     if len(repo_urls) == 0:
         raise MissingRepoError("No remote repository url found in provided pull request. Please provide one, or clearly state in your pull request that it is only a proposal.")
     
