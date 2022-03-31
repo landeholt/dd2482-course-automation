@@ -8,6 +8,7 @@
 
 import argparse
 from datetime import datetime
+import pytz
 from functools import reduce
 import logging
 from pathlib import Path
@@ -16,7 +17,6 @@ from typing import Any, Optional, cast
 import sys
 import json
 import requests
-
 from exceptions import AfterDeadlineError, AmbiguousRepoError, MissingRepoError, PrivateRepoError, UnclearPullRequest
 
 Payload = dict[str, Any]
@@ -33,9 +33,9 @@ logger = logging.getLogger(__name__)
 
 def parse_datetime_str(raw_datetime: str):
     try:
-        return datetime.strptime(raw_datetime, DATETIME_FORMAT)
+        return pytz.utc.localize(datetime.strptime(raw_datetime, DATETIME_FORMAT))
     except Exception:
-        return datetime.strptime(raw_datetime, "%Y-%m-%dT%H:%M:%S%z")
+        return pytz.utc.localize(datetime.strptime(raw_datetime, "%Y-%m-%dT%H:%M:%S%z"))
         
 
 
