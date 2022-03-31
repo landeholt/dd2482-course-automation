@@ -6,7 +6,7 @@ on:
       - 'contributions/course-automation/*/*.md'
 
 env:
-  DEADLINE: 2022-04-05T17:00:00Z
+  DEADLINE: "2022-04-05T17:00:00Z"
 
 jobs:
   check-pull-request:
@@ -20,4 +20,4 @@ jobs:
         cache: 'pip'
     - run: pip install -r requirements.txt
     - name: 'Parsing markdown for mandatory part(s)'
-      run: "python dd2482_course_automation -d=${{ env.DEADLINE }} -e=${{ github.event_path }} -s=${{ secrets.GITHUB_TOKEN }}"
+      run: "python dd2482_course_automation -d='${{ env.DEADLINE }}' -e=${{ github.event_path }} -s=${{ secrets.GITHUB_TOKEN }}"
