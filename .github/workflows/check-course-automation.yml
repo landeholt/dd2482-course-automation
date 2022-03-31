@@ -6,7 +6,7 @@ on:
       - 'contributions/course-automation/*/*.md'
 
 env:
-  DEADLINE: 2022-04-05T17:00:00Z
+  DEADLINE: "2022-04-05T17:00:00Z"
 
 jobs:
   check-pull-request:
