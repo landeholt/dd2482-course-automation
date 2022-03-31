@@ -41,6 +41,10 @@ def get_created_at(payload: Payload) -> datetime:
     pr = get_pull_request(payload)
     return parse_datetime_str(pr.get("created_at"))
 
+def get_updated_at(payload: Payload) -> datetime:
+    pr = get_pull_request(payload)
+    return parse_datetime_str(pr.get("updated_at"))
+
 def get_comments_url(payload: Payload) -> str:
     pr = get_pull_request(payload)
     return pr.get("comments_url")
@@ -86,13 +90,14 @@ def get_meta_details(payload: Payload):
     
 
 def get_repos(body: str) -> list[tuple[str, str]]:
-    return GITHUB_URL.findall(body)
+    return list(filter(lambda x: x[0] != "kth",GITHUB_URL.findall(body)))
     
 
 def get_stage(body: str):
     result = list(set(STAGE_PATTERN.findall(body)))
     # first instance is weighted to be most important
     # this selection is bound to fail. Better solution must be mandated.
+    logger.warning(str(result))
     if len(result) == 0:
         return None
     first = result[0]
@@ -141,6 +146,10 @@ def validate(deadline: datetime, payload: Payload, secret: Optional[str] = None)
     # 1. Validate that PR is created before deadline
     
     created_at = get_created_at(payload)
+    updated_at = get_updated_at(payload)
+    if updated_at > created_at:
+        created_at = updated_at
+        
     if created_at > deadline:
         raise AfterDeadlineError(f"Pull request after deadline: {deadline}")
     
