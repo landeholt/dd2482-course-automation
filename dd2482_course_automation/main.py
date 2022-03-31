@@ -155,6 +155,8 @@ def validate(deadline: datetime, payload: Payload, secret: Optional[str] = None)
     # 2. PR readme.md must have url to remote repo.
     repos = get_repos(body)
     
+    logger.warning(str(repos))
+    
     if len(repos) == 0:
         raise MissingRepoError("No remote repository url found in provided pull request. Please provide one, or clearly state in your pull request that it is only a proposal.")
     
