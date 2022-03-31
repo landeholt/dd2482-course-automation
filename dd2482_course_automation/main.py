@@ -32,7 +32,11 @@ logger = logging.getLogger(__name__)
 
 
 def parse_datetime_str(raw_datetime: str):
-    return datetime.strptime(raw_datetime, DATETIME_FORMAT)
+    try:
+        return datetime.strptime(raw_datetime, DATETIME_FORMAT)
+    except Exception:
+        return datetime.strptime(raw_datetime, "%Y-%m-%dT%H:%M:%S%z")
+        
 
 
 def get_payload(path: Path) -> Payload:
