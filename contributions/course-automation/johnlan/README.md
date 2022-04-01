@@ -18,4 +18,4 @@ Course Automation
 
 ## Description
 
-WTF!!!!!!!!!!!!
+WTF!!!
