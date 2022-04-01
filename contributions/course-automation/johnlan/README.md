@@ -1,4 +1,4 @@
-# Assignment REDACTED
+# Assignment Proposal
 
 ## Title
 
