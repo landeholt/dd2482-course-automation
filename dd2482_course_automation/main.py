@@ -25,13 +25,12 @@ logger = logging.getLogger(__name__)
 def estimate_line_number(text: str, pos: int):
     line_break_indices = [m.start() for m in re.finditer('\n', text)]
     
-    index_of_interest = max(line_break_indices[0] - 2, 0)
+    index_of_interest = max(line_break_indices[0] - 5, 0)
     return line_break_indices[index_of_interest]
 
 def restimate_line_number(text: str, pos: int):
     line_break_indices = [m.end() for m in re.finditer('\n', text)]
-    logger.warning(line_break_indices)
-    index_of_interest = min(line_break_indices[0] + 2, len(line_break_indices))
+    index_of_interest = min(line_break_indices[0] + 5, len(line_break_indices))
     return line_break_indices[index_of_interest]
 
 @dataclass
@@ -57,7 +56,8 @@ class Markdown:
             end = restimate_line_number(text, pos)
             
         window = self.raw[start:end].replace("```", "")
-        
+        logger.warning("window: " + window)
+        logger.warning("needle: " + string)
         start = max(window.find(string), 0)
         end = min(start + len(string), raw_size)
         window = window[:end] + "\t\t<-- HERE" + window[end:]
