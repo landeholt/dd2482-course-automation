@@ -1,4 +1,4 @@
-# Assignment ----
+# Assignment Proposal
 
 ## Title
 
