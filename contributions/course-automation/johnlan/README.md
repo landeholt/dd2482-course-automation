@@ -1,4 +1,4 @@
-# Assignment Proposal
+# Assignment REDACTED
 
 ## Title
 
@@ -19,4 +19,3 @@ Course Automation
 
 I hate hidden chars...... I tell you..
 
-no repo
