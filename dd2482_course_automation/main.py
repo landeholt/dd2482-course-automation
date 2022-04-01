@@ -116,7 +116,11 @@ def get_files(payload: Payload) -> list[Markdown]:
     
     def get(filename: str):
         owner, repo, __, branch = get_meta_details(payload)
-        return requests.get(f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{filename}?cache={random.randint(0,9999999)}").text
+        headers = {}
+        headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        headers["Pragma"] = "no-cache"
+        headers["Expires"] = "0"
+        return requests.get(f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{filename}?cache={random.randint(0,9999999)}", headers=headers).text
     
     def keep_markdown() -> list[Markdown]:
         return reduce(lambda acc, file_ : acc + [Markdown(name=file_["filename"],raw=get(file_["filename"]))] if file_["filename"].endswith(".md") and file_["status"] != "removed" else acc, files, [])
