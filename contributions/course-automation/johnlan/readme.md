@@ -18,7 +18,7 @@ Course Automation
 
 ## Description
 
-111111111111111111111111111111
+1111111111111111111111111111111
 https://github.com/landeholt/dd2482-course-automation
 In order to alleviate __redundant work__ for this course TAs I propose to automate verification of the following mandatory parts for ["course-automation"](https://github.com/kth/devops-course):
 
