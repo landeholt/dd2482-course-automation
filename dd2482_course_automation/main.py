@@ -219,6 +219,8 @@ def validate(deadline: datetime, payload: Payload, secret: Optional[str] = None)
                 raise UnclearPullRequest("Cannot find whether PR is __final submission__ or __proposal__. Please state it explicitly in your PR. Preferably as the title.")
             for repo in repos:
                 check_repo(repo, secret)
+    if len(payload["__result__"]["files"]) == 0:
+        raise FileNotFoundError("No non-zero line files found. Make sure that your pull requests contains a markdown file")
     
 
 
