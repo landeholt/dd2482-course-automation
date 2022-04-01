@@ -191,10 +191,10 @@ def validate(deadline: datetime, payload: Payload, secret: Optional[str] = None)
     files = get_files(payload)
     for f in files:
         if not f.is_empty():
-            logger.warning("name: " + f.name)
             payload["__result__"]["files"].append(f)
             
             is_final, window = f.get_stage()
+            logger.warning("window: " + window)
             repos = f.get_repos()
             
             if is_final:
