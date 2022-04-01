@@ -10,7 +10,6 @@ from typing import Any, Optional, cast
 import sys
 import json
 import requests
-import random
 from exceptions import AfterDeadlineError, AmbiguousRepoError, MissingRepoError, PrivateRepoError, UnclearPullRequest
 
 Payload = dict[str, Any]
@@ -120,7 +119,7 @@ def get_files(payload: Payload) -> list[Markdown]:
         headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
         headers["Pragma"] = "no-cache"
         headers["Expires"] = "0"
-        return requests.get(f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{filename}?cache={random.randint(0,9999999)}", headers=headers).text
+        return requests.get(f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{filename}", headers=headers).text
     
     def keep_markdown() -> list[Markdown]:
         return reduce(lambda acc, file_ : acc + [Markdown(name=file_["filename"],raw=get(file_["filename"]))] if file_["filename"].endswith(".md") and file_["status"] != "removed" else acc, files, [])
