@@ -55,7 +55,7 @@ class Markdown:
             pos = text.find("\n") + end
             end = restimate_line_number(text, pos)
             
-        window = self.raw[start:end].replace("```", "").replace("\r","\n")
+        window = self.raw[start:end].replace("```", "")
         start = max(window.find(string), 0)
         end = min(start + len(string), raw_size)
         before = window[start:end].replace("\n", "")
@@ -129,7 +129,7 @@ def get_files(payload: Payload) -> list[Markdown]:
         response = requests.get(f"https://api.github.com/repos/{owner}/{repo}/contents/{filename}?ref={branch}").json()
         
         content: list[str] = response["content"].split("\n")
-        return "\n".join([base64.b64decode(c).decode(encoding="utf-8") for c in content])
+        return "\n".join([base64.b64decode(c).decode(encoding="utf-8") for c in content]).replace("\r","\n")
         
         
         
