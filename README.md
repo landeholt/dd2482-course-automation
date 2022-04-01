@@ -110,3 +110,37 @@
 > assumed stage: **NOT FOUND** repos: - No repos found
 
 ## Solution
+
+We validate through parsing any provided markdown files. It has to end with `.md` due to:
+
+https://github.com/landeholt/dd2482-course-automation/blob/14e9790f804f6a52ea44c172184c6411ead01a71/dd2482_course_automation/main.py#L140-L141
+
+The algorithm starts of by checking whether the Pull Request was created/updated before the given deadline that can be changed in the actions `.yml` file.
+
+https://github.com/landeholt/dd2482-course-automation/blob/14e9790f804f6a52ea44c172184c6411ead01a71/.github/workflows/check-course-automation.yml#L8-L9
+
+After that easy condition, it starts off fetching all changed files for the Pull Request. Here it will throw an error, if the payload is empty.
+
+When all files have been sourced, it starts of to look for a `stage`.
+
+A stage must be one of the following:
+ 1. final
+ 2. submission
+ 3. proposal
+ 4. final submission
+
+If no stage is found, it throws an error telling the author that it cannot determine what to evaluate.
+
+After that it continues with looking for repository links by the following regex:
+
+```py
+GITHUB_URL = re.compile(r"https:\/\/(?:www\.)?github\.com\/([^\/]+)\/([\w\d\-\_]+)")
+
+```
+
+that later on gets filtered further to remove repos that are owned by `KTH`.
+
+If it could not find any public repositories for the pull request, it throws an error explaining that it could not do that.
+
+When all checks have been processed, it begins to build the feedback.
+   
