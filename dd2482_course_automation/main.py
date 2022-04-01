@@ -54,7 +54,7 @@ class Markdown:
         
         start = max(window.find(string), 0)
         end = min(start + len(string), raw_size)
-        window = window[:start] + "<-- HERE \n\n" + window[end:]
+        window = window[:end] + "<-- HERE" + window[end:]
         return window
     
     def is_empty(self):
