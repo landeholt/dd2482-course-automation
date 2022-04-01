@@ -40,6 +40,8 @@ class Markdown:
     
     def get_line_window(self, string: str):
         raw_size = len(self.raw)
+        
+        logger.warning(self.raw)
         start = max(self.raw.find(string), 0)
         end = min(start + len(string), raw_size)
         
