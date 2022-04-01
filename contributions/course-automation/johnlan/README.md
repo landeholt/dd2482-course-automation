@@ -13,7 +13,7 @@ Automatic verifsication for mandatory parts of course-automation final
 Deadline to complete task 1: April 5, 17h adsadsdasadsStockholm time
 
 ## Category
-
+dsa
 Course Automation
 
 ## Description
