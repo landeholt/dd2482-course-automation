@@ -59,7 +59,7 @@ class Markdown:
         start = max(window.find(string), 0)
         end = min(start + len(string), raw_size)
         logger.warning(f"{start}:{end}: {window[start:end]}")
-        window = window[start:end] + "    <-- HERE" + window[end:]
+        window = window[start:end].replace("\n", "") + "    <-- HERE" + window[end:]
         
         return window
     
