@@ -22,13 +22,13 @@ DATETIME_FORMAT = "%m/%d/%Y %H:%M:%S"
 logger = logging.getLogger(__name__)
 
 def estimate_line_number(text: str, pos: int):
-    line_break_indices = [i for i in range(len(text)) if text.startswith("\n")]
-    index_of_interest = max(line_break_indices.index(pos) - 1, 0)
+    line_break_indices = [m.start() for m in re.finditer('\n\n', text)]
+    index_of_interest = max(line_break_indices[0] - 1, 0)
     return line_break_indices[index_of_interest]
 
 def restimate_line_number(text: str, pos: int):
-    line_break_indices = [i for i in range(len(text)) if text.startswith("\n")]
-    index_of_interest = min(line_break_indices.index(pos) + 1, len(line_break_indices))
+    line_break_indices = [m.end() for m in re.finditer('\n\n', text)]
+    index_of_interest = min(line_break_indices[0] + 1, len(line_break_indices))
     return line_break_indices[index_of_interest]
 
 @dataclass
@@ -40,17 +40,16 @@ class Markdown:
         raw_size = len(self.raw)
         start = max(self.raw.find(string), 0)
         end = min(start + len(string), raw_size)
-                
+        
         if start != 0:
             text = self.raw[0:start]
-            pos = text.rfind("\n")
+            pos = text.rfind("\n\n")
             start = estimate_line_number(text, pos)
         
         if end != raw_size:
             text = self.raw[end:raw_size]
-            pos = text.find("\n")
-            end = estimate_line_number(text, pos)
-        
+            pos = text.find("\n\n") + end
+            end = restimate_line_number(text, pos)
         return self.raw[start:end]
     
     def is_empty(self):
@@ -63,7 +62,6 @@ class Markdown:
             return False, None
         stage = match.group(0)
         window = self.get_line_window(stage)
-        logger.warning(window)
         is_final = "proposal" not in stage
         
         return is_final, window
@@ -194,7 +192,6 @@ def validate(deadline: datetime, payload: Payload, secret: Optional[str] = None)
             payload["__result__"]["files"].append(f)
             
             is_final, window = f.get_stage()
-            logger.warning("window: " + window)
             repos = f.get_repos()
             
             if is_final:
@@ -206,28 +203,6 @@ def validate(deadline: datetime, payload: Payload, secret: Optional[str] = None)
                 raise UnclearPullRequest("Cannot find whether PR is __final submission__ or __proposal__. Please state it explicitly in your PR. Preferably as the title.")
             for repo in repos:
                 check_repo(repo, secret)
-    """
-    is_final, found_stage = get_stage(body)
-    if found_stage:
-        payload["__result__"]["stage"] = found_stage
-        payload["__result__"]["is_final"] = is_final
-    
-    # 2. PR readme.md must have url to remote repo.
-    repos = get_repos(body)
-    payload["__result__"]["repos"] += list(map(lambda x : x[1], repos))
-        
-    if len(repos) == 0 and is_final:
-        raise MissingRepoError("No remote repository url found in provided pull request. Please provide one, or clearly state in your pull request that it is only a proposal.")
-    
-    # 3. PR readme.md must state whether it is a proposal or submission
-    if not found_stage:
-        raise UnclearPullRequest("Cannot find whether PR is __final submission__ or __proposal__. Please state it explicitly in your PR. Preferably as the title.")
-    
-    
-    # 4. PR readme.md must have public repos
-    for repo in repos:
-        check_repo(repo, secret)
-    """
     
 
 
@@ -353,4 +328,5 @@ def cli():
     
 if __name__ == "__main__":
     cli()
+
     
