@@ -2,7 +2,7 @@
 
 ## Title
 
-Automatic verification for mandatory parts of course-automation final
+Automatic verifsication for mandatory parts of course-automation final
 
 ## Names and KTH ID
 
