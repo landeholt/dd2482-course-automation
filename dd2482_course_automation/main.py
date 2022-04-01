@@ -116,7 +116,7 @@ def get_files(payload: Payload) -> list[Markdown]:
     
     def get(filename: str):
         owner, repo, __, branch = get_meta_details(payload)
-        return requests.get(f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{filename}?cache={random.randint(0,100)}").text
+        return requests.get(f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{filename}?cache={random.randint(0,9999999)}").text
     
     def keep_markdown() -> list[Markdown]:
         return reduce(lambda acc, file_ : acc + [Markdown(name=file_["filename"],raw=get(file_["filename"]))] if file_["filename"].endswith(".md") and file_["status"] != "removed" else acc, files, [])
@@ -196,8 +196,7 @@ def validate(deadline: datetime, payload: Payload, secret: Optional[str] = None)
     for f in files:
         if not f.is_empty():
             payload["__result__"]["files"].append(f)
-            
-            
+                        
             is_final, window = f.get_stage()
             repos = f.get_repos()
             
