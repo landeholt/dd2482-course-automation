@@ -137,6 +137,8 @@ def get_meta_details(payload: Payload):
     sha = head.get("sha")
     repo = repository.get("name")
     owner: str = cast(Payload,repository.get("owner"))["login"]
+    logger.warning(ref)
+    logger.warning(sha)
     return owner, repo, sha, ref
     
     
