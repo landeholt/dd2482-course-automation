@@ -126,12 +126,6 @@ def get_files(payload: Payload) -> list[Markdown]:
         headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
         headers["Pragma"] = "no-cache"
         headers["Expires"] = "0"
-        """
-        response = requests.get(f"https://api.github.com/repos/{owner}/{repo}/contents/{filename}?ref={branch}").json()
-        
-        content: list[str] = response["content"].split("\n")
-        return "\n".join([base64.b64decode(c).decode(encoding="utf-8") for c in content]).replace("\r","\n")
-        """
         
         return requests.get(url=f"https://raw.githubusercontent.com/{owner}/{repo}/{sha}/{filename}").text
         
@@ -302,7 +296,7 @@ def give_feedback(payload: Payload, secret: Optional[str], error_message: Option
         
         if error_message:
             return error_message + message
-        return "All mandatory parts where found. Awaiting TA for final judgement." + message
+        return "All mandatory parts were found. Awaiting TA for final judgement." + message
     
         
     status = 'failure' if error_message else "success"
