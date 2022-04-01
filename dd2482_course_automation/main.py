@@ -14,7 +14,6 @@ from exceptions import AfterDeadlineError, AmbiguousRepoError, MissingRepoError,
 
 Payload = dict[str, Any]
 GITHUB_URL = re.compile(r"https:\/\/(?:www\.)?github\.com\/([^\/]+)\/([\w\d\-\_]+)")
-# propose, proposal, final, final submission
 STAGE_PATTERN = re.compile(r"\#.+(final|proposal|submission).*")
 
 DATETIME_FORMAT = "%m/%d/%Y %H:%M:%S"
@@ -36,6 +35,7 @@ class Markdown:
     name: str
     raw: str
     
+    
     def get_line_window(self, string: str):
         raw_size = len(self.raw)
         start = max(self.raw.find(string), 0)
@@ -50,7 +50,7 @@ class Markdown:
             text = self.raw[end:raw_size]
             pos = text.find("\n\n") + end
             end = restimate_line_number(text, pos)
-        return self.raw[start:end]
+        return self.raw[start:end].replace("```", "")
     
     def is_empty(self):
         return len(self.raw) == 0
@@ -262,7 +262,7 @@ def give_feedback(payload: Payload, secret: Optional[str], error_message: Option
             
             if window:
                 file_message += f"assumed stage: `{stage}`\n"
-                file_message += f"```markdown\n{window}```\n"
+                file_message += f"```markdown\n...\n{window}\n...```\n"
             else:
                 file_message += f"assumed stage: __NOT FOUND__\n"
                 
