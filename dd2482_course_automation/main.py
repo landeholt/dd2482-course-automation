@@ -23,11 +23,15 @@ logger = logging.getLogger(__name__)
 
 def estimate_line_number(text: str, pos: int):
     line_break_indices = [m.start() for m in re.finditer('\n\n', text)]
+    if len(line_break_indices) == 0:
+        line_break_indices.append(0)
     index_of_interest = max(line_break_indices[0] - 1, 0)
     return line_break_indices[index_of_interest]
 
 def restimate_line_number(text: str, pos: int):
     line_break_indices = [m.end() for m in re.finditer('\n\n', text)]
+    if len(line_break_indices) == 0:
+        line_break_indices.append(0)
     index_of_interest = min(line_break_indices[0] + 1, len(line_break_indices))
     return line_break_indices[index_of_interest]
 
@@ -219,6 +223,8 @@ def validate(deadline: datetime, payload: Payload, secret: Optional[str] = None)
                 raise UnclearPullRequest("Cannot find whether PR is __final submission__ or __proposal__. Please state it explicitly in your PR. Preferably as the title.")
             for repo in repos:
                 check_repo(repo, secret)
+    if len(payload["__result__"]["files"]) == 0:
+        raise FileNotFoundError("No non-zero line files found. Make sure that your pull requests contains a markdown file")
     
 
 
