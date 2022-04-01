@@ -121,15 +121,19 @@ def get_files(payload: Payload) -> list[Markdown]:
     files = get_pull_request_files(payload)
     
     def get(filename: str):
-        owner, repo, __, branch = get_meta_details(payload)
+        owner, repo, sha, branch = get_meta_details(payload)
         headers = {}
         headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
         headers["Pragma"] = "no-cache"
         headers["Expires"] = "0"
+        """
         response = requests.get(f"https://api.github.com/repos/{owner}/{repo}/contents/{filename}?ref={branch}").json()
         
         content: list[str] = response["content"].split("\n")
         return "\n".join([base64.b64decode(c).decode(encoding="utf-8") for c in content]).replace("\r","\n")
+        """
+        
+        return requests.get(url=f"https://raw.githubusercontent.com/{owner}/{repo}/{sha}/{filename}").text
         
         
         
