@@ -53,6 +53,9 @@ class Markdown:
         
         return self.raw[start:end]
     
+    def is_empty(self):
+        return len(self.raw) == 0
+    
     def get_stage(self):
         match = STAGE_PATTERN.search(self.raw.lower())
         
@@ -188,22 +191,21 @@ def validate(deadline: datetime, payload: Payload, secret: Optional[str] = None)
     files = get_files(payload)
     logger.warning(str(files))
     for f in files:
-        if len(f.raw) == 0:
-            continue
-        
-        is_final, window = f.get_stage()
-        repos = f.get_repos()
-        
-        if is_final:
-            payload["__result__"]["is_final"] = is_final
-        
-        payload["__result__"]["files"].append(f)
-        if len(repos) == 0 and is_final:
-            raise MissingRepoError("No remote repository url found in provided pull request. Please provide one, or clearly state in your pull request that it is only a proposal.")
-        if not window:
-            raise UnclearPullRequest("Cannot find whether PR is __final submission__ or __proposal__. Please state it explicitly in your PR. Preferably as the title.")
-        for repo in repos:
-            check_repo(repo, secret)
+        if not f.is_empty():
+            payload["__result__"]["files"].append(f)
+            
+            is_final, window = f.get_stage()
+            repos = f.get_repos()
+            
+            if is_final:
+                payload["__result__"]["is_final"] = is_final
+            
+            if len(repos) == 0 and is_final:
+                raise MissingRepoError("No remote repository url found in provided pull request. Please provide one, or clearly state in your pull request that it is only a proposal.")
+            if not window:
+                raise UnclearPullRequest("Cannot find whether PR is __final submission__ or __proposal__. Please state it explicitly in your PR. Preferably as the title.")
+            for repo in repos:
+                check_repo(repo, secret)
     """
     is_final, found_stage = get_stage(body)
     if found_stage:
