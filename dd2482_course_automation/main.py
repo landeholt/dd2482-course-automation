@@ -178,7 +178,6 @@ def validate(deadline: datetime, payload: Payload, secret: Optional[str] = None)
     payload["__result__"] = {"files": [],"created_at": None, "is_final": False}
     
     
-    # 1. Validate that PR is created before deadline
     
     created_at = get_created_at(payload)
     updated_at = get_updated_at(payload)
