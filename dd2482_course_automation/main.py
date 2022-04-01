@@ -56,10 +56,9 @@ class Markdown:
             end = restimate_line_number(text, pos)
             
         window = self.raw[start:end].replace("```", "")
-        logger.warning("window: " + window)
-        logger.warning("needle: " + string)
         start = max(window.find(string), 0)
         end = min(start + len(string), raw_size)
+        logger.warning(f"{start}:{end}: {window[start:end]}")
         window = window[:end] + "\t\t<-- HERE" + window[end:]
         return window
     
@@ -126,7 +125,6 @@ def get_files(payload: Payload) -> list[Markdown]:
         headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
         headers["Pragma"] = "no-cache"
         headers["Expires"] = "0"
-        #return requests.get(f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{filename}", headers=headers).text
         response = requests.get(f"https://api.github.com/repos/{owner}/{repo}/contents/{filename}?ref={branch}").json()
         
         content: list[str] = response["content"].split("\n")
