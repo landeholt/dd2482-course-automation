@@ -19,4 +19,4 @@ Course Automation
 
 I hate hidden chars..
 
-https://github.com/landeholt/dd2482-course-automation-very-secret
+https://github.com/landeholt/dd2482-course-automation
