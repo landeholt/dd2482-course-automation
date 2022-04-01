@@ -180,7 +180,7 @@ def check_repo(repo, secret):
 
 def validate(deadline: datetime, payload: Payload, secret: Optional[str] = None):
     
-    payload["__result__"] = {"files": [],"pr_created_at": None, "is_final": False}
+    payload["__result__"] = {"files": [],"created_at": None, "is_final": False}
     
     
     # 1. Validate that PR is created before deadline
@@ -190,7 +190,7 @@ def validate(deadline: datetime, payload: Payload, secret: Optional[str] = None)
     if updated_at > created_at:
         created_at = updated_at
         
-    payload["__result__"]["pr_created_at"] = created_at
+    payload["__result__"]["created_at"] = created_at
         
     if created_at > deadline:
         raise AfterDeadlineError(f"Pull request after deadline: {deadline}")
