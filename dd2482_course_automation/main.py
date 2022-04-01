@@ -262,7 +262,7 @@ def give_feedback(payload: Payload, secret: Optional[str], error_message: Option
             
             if window:
                 file_message += f"assumed stage: `{stage}`\n"
-                file_message += f"```markdown\n...\n{window}\n...```\n"
+                file_message += f"```markdown\n...\n{window}\n...\n```\n"
             else:
                 file_message += f"assumed stage: __NOT FOUND__\n"
                 
