@@ -22,13 +22,13 @@ DATETIME_FORMAT = "%m/%d/%Y %H:%M:%S"
 logger = logging.getLogger(__name__)
 
 def estimate_line_number(text: str, pos: int):
-    line_break_indices = [m.start() for m in re.finditer('\n', text)]
+    line_break_indices = [m.start() for m in re.finditer('\n\n', text)]
     
     index_of_interest = max(line_break_indices[0] - 1, 0)
     return line_break_indices[index_of_interest]
 
 def restimate_line_number(text: str, pos: int):
-    line_break_indices = [m.end() for m in re.finditer('\n', text)]
+    line_break_indices = [m.end() for m in re.finditer('\n\n', text)]
     index_of_interest = min(line_break_indices[0] + 1, len(line_break_indices))
     return line_break_indices[index_of_interest]
 
@@ -52,6 +52,7 @@ class Markdown:
             text = self.raw[end:raw_size]
             pos = text.find("\n") + end
             end = restimate_line_number(text, pos)
+            
         window = self.raw[start:end].replace("```", "")
         
         start = max(window.find(string), 0)
@@ -111,6 +112,9 @@ def get_pr_body(payload: Payload) -> str:
     pr = get_pull_request(payload)
     return pr.get("body", "")
 
+def clean_content(content: str):
+    return content.replace("\n", "")
+
 def get_files(payload: Payload) -> list[Markdown]:
     
     files = get_pull_request_files(payload)
@@ -124,8 +128,8 @@ def get_files(payload: Payload) -> list[Markdown]:
         #return requests.get(f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{filename}", headers=headers).text
         response = requests.get(f"https://api.github.com/repos/{owner}/{repo}/contents/{filename}?ref={branch}").json()
         
-        content: str = response["content"].replace("\n", "")
-        return base64.b64decode(content).decode(encoding="utf-8")
+        content: list[str] = response["content"].splitlines()
+        return "\n".join([base64.b64decode(c).decode(encoding="utf-8") for c in content])
         
         
         
