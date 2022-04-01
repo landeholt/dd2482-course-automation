@@ -17,7 +17,7 @@ Deadline to complete task 1: April 5, 17h Stockholm time
 Course Automation why?
 
 ## Description
-
+1
 In order to alleviate __redundant work__ for this course TAs I propose to automate verification of the following mandatory parts for ["course-automation"](#):
 
 -   timeliness: the automation is done before the __first task__ deadline (in order to be useful for the course)
