@@ -55,10 +55,10 @@ class Markdown:
             pos = text.find("\n") + end
             end = restimate_line_number(text, pos)
             
-        window = self.raw[start:end].replace("```", "")
+        window = self.raw[start:end].replace("```", "").replace("\r","\n")
         start = max(window.find(string), 0)
         end = min(start + len(string), raw_size)
-        before = window[start:end].replace("\r","").replace("\n", "")
+        before = window[start:end].replace("\n", "")
         window = before + "    <-- HERE\n" + window[end:]
         
         return window
