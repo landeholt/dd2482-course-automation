@@ -137,8 +137,6 @@ def get_meta_details(payload: Payload):
     sha = head.get("sha")
     repo = repository.get("name")
     owner: str = cast(Payload,repository.get("owner"))["login"]
-    logger.warning(ref)
-    logger.warning(sha)
     return owner, repo, sha, ref
     
     
@@ -197,6 +195,8 @@ def validate(deadline: datetime, payload: Payload, secret: Optional[str] = None)
     for f in files:
         if not f.is_empty():
             payload["__result__"]["files"].append(f)
+            
+            logger.warning("raw: "+f.raw)
             
             is_final, window = f.get_stage()
             repos = f.get_repos()
