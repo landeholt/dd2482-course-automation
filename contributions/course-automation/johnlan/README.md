@@ -10,7 +10,7 @@ Automatic verifsication for mandatory parts of course-automation final
 
 ## Deadline
 
-Deadline to complete task 1: April 5, 17h Stockholm time
+Deadline to complete task 1: April 5, 17h adsadsdasadsStockholm time
 
 ## Category
 
