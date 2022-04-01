@@ -1,4 +1,4 @@
-# Assignment kukhuvud
+# Assignment proposal
 
 ## Title
 
