@@ -59,7 +59,7 @@ class Markdown:
         start = max(window.find(string), 0)
         end = min(start + len(string), raw_size)
         before = window[start:end].replace("\r", "").replace("\n", "")
-        window = before + "    <-- HERE\n" + window[end:]
+        window = before + "    <-- HERE" + window[end:]
         
         return window
     
