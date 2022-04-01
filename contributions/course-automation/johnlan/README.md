@@ -17,6 +17,6 @@ Course Automation
 
 ## Description
 
-I hate hidden chars..
+I hate hidden chars......
 
 https://github.com/landeholt/dd2482-course-automation
