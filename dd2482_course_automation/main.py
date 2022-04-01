@@ -10,6 +10,7 @@ from typing import Any, Optional, cast
 import sys
 import json
 import requests
+import random
 from exceptions import AfterDeadlineError, AmbiguousRepoError, MissingRepoError, PrivateRepoError, UnclearPullRequest
 
 Payload = dict[str, Any]
@@ -115,7 +116,7 @@ def get_files(payload: Payload) -> list[Markdown]:
     
     def get(filename: str):
         owner, repo, __, branch = get_meta_details(payload)
-        return requests.get(f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{filename}").text
+        return requests.get(f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{filename}?cache={random.randint(0,100)}").text
     
     def keep_markdown() -> list[Markdown]:
         return reduce(lambda acc, file_ : acc + [Markdown(name=file_["filename"],raw=get(file_["filename"]))] if file_["filename"].endswith(".md") and file_["status"] != "removed" else acc, files, [])
