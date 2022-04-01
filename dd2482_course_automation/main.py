@@ -129,7 +129,7 @@ def get_files(payload: Payload) -> list[Markdown]:
         #return requests.get(f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{filename}", headers=headers).text
         response = requests.get(f"https://api.github.com/repos/{owner}/{repo}/contents/{filename}?ref={branch}").json()
         
-        content: list[str] = response["content"].splitlines()
+        content: list[str] = response["content"].split("\n")
         return "\n".join([base64.b64decode(c).decode(encoding="utf-8") for c in content])
         
         
