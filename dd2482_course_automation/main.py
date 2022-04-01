@@ -56,13 +56,11 @@ class Markdown:
     def get_stage(self):
         match = STAGE_PATTERN.search(self.raw.lower())
         
-        logger.warning(str(match))
-        logger.warning(self.raw)
         if not match:
             return False, None
         stage = match.group(0)
         window = self.get_line_window(stage)
-        
+        logger.warning(window)
         is_final = "proposal" not in stage
         
         return is_final, window
@@ -134,19 +132,7 @@ def get_meta_details(payload: Payload):
     owner: str = cast(Payload,repository.get("owner"))["login"]
     return owner, repo, sha, ref
     
-
-def get_repos(body: str) -> list[tuple[str, str]]:
-    return list(filter(lambda x: x[0] != "kth",GITHUB_URL.findall(body)))
     
-
-def get_stage(body: str):
-    match = STAGE_PATTERN.search(body)
-    if not match:
-        return False, None
-    is_final = "proposal" not in match.group(0)
-    size = 10
-    window = body[max(match.start(0) - size,0):min(match.end(0) + size, len(body))]
-    return is_final, window
 
 def get_issue_number(payload: Payload):
     pr = get_pull_request(payload)
@@ -200,6 +186,7 @@ def validate(deadline: datetime, payload: Payload, secret: Optional[str] = None)
     
     
     files = get_files(payload)
+    logger.warning(str(files))
     for f in files:
         if len(f.raw) == 0:
             continue
