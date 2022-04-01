@@ -1,6 +1,7 @@
 import argparse
 from dataclasses import dataclass
 from datetime import datetime
+from distutils.errors import LibError
 import pytz
 from functools import reduce
 import logging
@@ -28,7 +29,8 @@ def estimate_line_number(text: str, pos: int):
     return line_break_indices[index_of_interest]
 
 def restimate_line_number(text: str, pos: int):
-    line_break_indices = [m.end() for m in re.finditer('\n\n', text)]
+    line_break_indices = [m.end() for m in re.finditer('\n', text)]
+    logger.warning(line_break_indices)
     index_of_interest = min(line_break_indices[0] + 1, len(line_break_indices))
     return line_break_indices[index_of_interest]
 
@@ -41,7 +43,6 @@ class Markdown:
     def get_line_window(self, string: str):
         raw_size = len(self.raw)
         
-        logger.warning(self.raw)
         start = max(self.raw.find(string), 0)
         end = min(start + len(string), raw_size)
         
@@ -114,8 +115,6 @@ def get_pr_body(payload: Payload) -> str:
     pr = get_pull_request(payload)
     return pr.get("body", "")
 
-def clean_content(content: str):
-    return content.replace("\n", "")
 
 def get_files(payload: Payload) -> list[Markdown]:
     
