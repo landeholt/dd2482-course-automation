@@ -263,7 +263,7 @@ def give_feedback(payload: Payload, secret: Optional[str], error_message: Option
             file_message = ""
             repos = f.get_repos()
             is_final, window = f.get_stage()
-            stage = "final_submission" if is_final else "submission"
+            stage = "final_submission" if is_final else "proposal"
             file_message += f"{f.name}\n---\n"
             
             if window:
