@@ -10,6 +10,7 @@ from typing import Any, Optional, cast
 import sys
 import json
 import requests
+import base64
 from exceptions import AfterDeadlineError, AmbiguousRepoError, MissingRepoError, PrivateRepoError, UnclearPullRequest
 
 Payload = dict[str, Any]
@@ -119,8 +120,14 @@ def get_files(payload: Payload) -> list[Markdown]:
         headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
         headers["Pragma"] = "no-cache"
         headers["Expires"] = "0"
-        return requests.get(f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{filename}", headers=headers).text
-    
+        #return requests.get(f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{filename}", headers=headers).text
+        response = requests.get(f"https://api.github.com/repos/{owner}/{repo}/contents/{filename}?ref={branch}").json()
+        
+        content: str = response["content"].replace("\n", "")
+        return base64.b64decode(content).decode(encoding="utf-8")
+        
+        
+        
     def keep_markdown() -> list[Markdown]:
         return reduce(lambda acc, file_ : acc + [Markdown(name=file_["filename"],raw=get(file_["filename"]))] if file_["filename"].endswith(".md") and file_["status"] != "removed" else acc, files, [])
     
