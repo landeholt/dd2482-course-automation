@@ -55,6 +55,9 @@ class Markdown:
     
     def get_stage(self):
         match = STAGE_PATTERN.search(self.raw.lower())
+        
+        logger.warning(str(match))
+        logger.warning(self.raw)
         if not match:
             return False, None
         stage = match.group(0)
