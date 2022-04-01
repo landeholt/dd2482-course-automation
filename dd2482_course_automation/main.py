@@ -58,8 +58,7 @@ class Markdown:
         window = self.raw[start:end].replace("```", "")
         start = max(window.find(string), 0)
         end = min(start + len(string), raw_size)
-        before = window[start:end].replace("\n","")
-        logger.warning(repr(before))
+        before = window[start:end].replace("\r","").replace("\n", "")
         window = before + "    <-- HERE\n" + window[end:]
         
         return window
