@@ -50,7 +50,12 @@ class Markdown:
             text = self.raw[end:raw_size]
             pos = text.find("\n\n") + end
             end = restimate_line_number(text, pos)
-        return self.raw[start:end].replace("```", "")
+        window = self.raw[start:end].replace("```", "")
+        
+        start = max(window.find(string), 0)
+        end = min(start + len(string), raw_size)
+        window = window[:start] + "<-- HERE \n\n" + window[end:]
+        return window
     
     def is_empty(self):
         return len(self.raw) == 0
