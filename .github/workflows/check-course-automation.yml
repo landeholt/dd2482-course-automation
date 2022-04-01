@@ -18,6 +18,6 @@ jobs:
       with:
         python-version: "3.9.10"
         cache: 'pip'
-    - run: pip install -r requirements.txt
+    - run: pip install dd2482-course-automation
     - name: 'Parsing markdown for mandatory part(s)'
-      run: "python dd2482_course_automation --deadline='${{ env.DEADLINE }}' --event=${{ github.event_path }} --secret=${{ secrets.GITHUB_TOKEN }}"
+      run: "ddca --deadline='${{ env.DEADLINE }}' --event=${{ github.event_path }} --secret=${{ secrets.GITHUB_TOKEN }}"
