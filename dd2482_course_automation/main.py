@@ -1,4 +1,5 @@
 import argparse
+from dataclasses import dataclass
 from datetime import datetime
 import pytz
 from functools import reduce
@@ -20,14 +21,59 @@ DATETIME_FORMAT = "%m/%d/%Y %H:%M:%S"
 
 logger = logging.getLogger(__name__)
 
+def estimate_line_number(text: str, pos: int):
+    line_break_indices = [i for i in range(len(text)) if text.startswith("\n")]
+    index_of_interest = max(line_break_indices.index(pos) - 1, 0)
+    return line_break_indices[index_of_interest]
+
+def restimate_line_number(text: str, pos: int):
+    line_break_indices = [i for i in range(len(text)) if text.startswith("\n")]
+    index_of_interest = min(line_break_indices.index(pos) + 1, len(line_break_indices))
+    return line_break_indices[index_of_interest]
+
+@dataclass
+class Markdown:
+    name: str
+    raw: str
+    
+    def get_line_window(self, string: str):
+        raw_size = len(self.raw)
+        start = max(self.raw.find(string), 0)
+        end = min(start + len(string), raw_size)
+                
+        if start != 0:
+            text = self.raw[0:start]
+            pos = text.rfind("\n")
+            start = estimate_line_number(text, pos)
+        
+        if end != raw_size:
+            text = self.raw[end:raw_size]
+            pos = text.find("\n")
+            end = estimate_line_number(text, pos)
+        
+        return self.raw[start:end]
+    
+    def get_stage(self):
+        match = STAGE_PATTERN.search(self.raw.lower())
+        if not match:
+            return False, None
+        stage = match.group(0)
+        window = self.get_line_window(stage)
+        
+        is_final = "proposal" not in stage
+        
+        return is_final, window
+
+    def get_repos(self) -> list[tuple[str, str]]:
+        return list(filter(lambda x: x[0] != "kth",GITHUB_URL.findall(self.raw.lower())))
+            
+        
 
 def parse_datetime_str(raw_datetime: str):
     try:
         return pytz.utc.localize(datetime.strptime(raw_datetime, DATETIME_FORMAT))
     except Exception:
         return datetime.strptime(raw_datetime, "%Y-%m-%dT%H:%M:%S%z")
-        
-
 
 def get_payload(path: Path) -> Payload:
     return json.loads(path.read_bytes())
@@ -56,24 +102,23 @@ def get_pr_body(payload: Payload) -> str:
     pr = get_pull_request(payload)
     return pr.get("body", "")
 
-def get_body(payload: Payload) -> str:
+def get_files(payload: Payload) -> list[Markdown]:
     
     files = get_pull_request_files(payload)
     
     def get(filename: str):
         owner, repo, __, branch = get_meta_details(payload)
-        return requests.get(f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{filename}").text.lower()
+        return requests.get(f"https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{filename}").text
     
-    def keep_markdown():
-        return reduce(lambda acc, file_ : acc + [(file_["filename"],get(file_["filename"]))] if file_["filename"].endswith(".md") and file_["status"] != "removed" else acc, files, [])
+    def keep_markdown() -> list[Markdown]:
+        return reduce(lambda acc, file_ : acc + [Markdown(name=file_["filename"],raw=get(file_["filename"]))] if file_["filename"].endswith(".md") and file_["status"] != "removed" else acc, files, [])
     
-    kept_files: list[tuple[str,str]] = keep_markdown()
+    kept_files = keep_markdown()
     
     if len(kept_files) == 0:
         raise FileNotFoundError("Pull request did not have any committed files")
     
-    blob = '---'.join(map(lambda x : x[1], kept_files))
-    return blob
+    return kept_files
     
 
 def get_meta_details(payload: Payload):
@@ -96,8 +141,8 @@ def get_stage(body: str):
     if not match:
         return False, None
     is_final = "proposal" not in match.group(0)
-    
-    window = body[max(match.start(0) - 10,0):min(match.end(0) + 10, len(body))]
+    size = 10
+    window = body[max(match.start(0) - size,0):min(match.end(0) + size, len(body))]
     return is_final, window
 
 def get_issue_number(payload: Payload):
@@ -121,7 +166,7 @@ def get_args(args: dict[str, str]) -> tuple[datetime, Payload, Optional[str]]:
         return parse_datetime_str(d), get_payload(Path(e)), s
     except Exception as exc:
         raise exc
-       
+
 
 def check_repo(repo, secret):
     owner, repo_name, = repo
@@ -135,7 +180,7 @@ def check_repo(repo, secret):
 
 def validate(deadline: datetime, payload: Payload, secret: Optional[str] = None):
     
-    payload["__result__"] = {"is_final": False, "stage": None, "repos": [], "created_at": None}
+    payload["__result__"] = {"files": [],"pr_created_at": None, "is_final": False}
     
     
     # 1. Validate that PR is created before deadline
@@ -145,13 +190,31 @@ def validate(deadline: datetime, payload: Payload, secret: Optional[str] = None)
     if updated_at > created_at:
         created_at = updated_at
         
+    payload["__result__"]["pr_created_at"] = created_at
+        
     if created_at > deadline:
         raise AfterDeadlineError(f"Pull request after deadline: {deadline}")
     
-    payload["__result__"]["created_at"] = created_at
     
-    body = get_body(payload)
-    
+    files = get_files(payload)
+    for f in files:
+        if len(f.raw) == 0:
+            continue
+        
+        is_final, window = f.get_stage()
+        repos = f.get_repos()
+        
+        if is_final:
+            payload["__result__"]["is_final"] = is_final
+        
+        payload["__result__"]["files"].append(f)
+        if len(repos) == 0 and is_final:
+            raise MissingRepoError("No remote repository url found in provided pull request. Please provide one, or clearly state in your pull request that it is only a proposal.")
+        if not window:
+            raise UnclearPullRequest("Cannot find whether PR is __final submission__ or __proposal__. Please state it explicitly in your PR. Preferably as the title.")
+        for repo in repos:
+            check_repo(repo, secret)
+    """
     is_final, found_stage = get_stage(body)
     if found_stage:
         payload["__result__"]["stage"] = found_stage
@@ -172,12 +235,13 @@ def validate(deadline: datetime, payload: Payload, secret: Optional[str] = None)
     # 4. PR readme.md must have public repos
     for repo in repos:
         check_repo(repo, secret)
+    """
     
 
 
 def give_feedback(payload: Payload, secret: Optional[str], error_message: Optional[str] = None):
     
-    result: dict[str, str] = payload["__result__"]
+    result: dict[str, Any] = payload["__result__"]
     stage = "final_submission" if result["is_final"] else "proposal"
     
     if not secret:
@@ -212,19 +276,39 @@ def give_feedback(payload: Payload, secret: Optional[str], error_message: Option
         log("[POST::PR-COMMENT]: " + str(json_))
         return requests.post(url=url,headers=headers,json=json_).json()
     
+    def format_repo_url(repotuple: tuple[str, str]):
+        owner, repo = repotuple
+        return f"[{repo}](https://www.github.com/{owner}/{repo})"
+        
+    
     def format_body():
-        repos = result["repos"]
-        if len(repos) == 0:
-            repos.append("No repos found..")  # type: ignore
+        files: list[Markdown] = result["files"]
         created_at = result["created_at"]
-        decision_message = "\n---\n\nDecision is based on the following findings:\n\n"
-        decision_message += f'assumed stage: `{stage}`\n'
-        decision_message += f"created_at: {created_at}\n"
-        decision_message += f"repos:\n"
-        decision_message += '\n'.join(map(lambda x : '\t- ' + x,repos))
+        
+        message = f"\n---\n\nDecision is based on the following findings:\n\ncreated at: {created_at}\n\n"
+        for f in files:
+            file_message = ""
+            repos = f.get_repos()
+            is_final, window = f.get_stage()
+            stage = "final_submission" if is_final else "submission"
+            file_message += f"{f.name}\n---\n"
+            
+            if window:
+                file_message += f"assumed stage: `{stage}`\n"
+                file_message += f"```markdown\n{window}```\n"
+            else:
+                file_message += f"assumed stage: __NOT FOUND__\n"
+                
+            file_message += "repos:\n"
+            if len(repos) == 0:
+                file_message += "\t- No repos found\n"
+            else:
+                file_message += '\n'.join(map(lambda x : '\t- ' + format_repo_url(x), repos))
+            message += file_message + "\n"
+        
         if error_message:
-            return error_message +  decision_message
-        return "All mandatory parts where found. Awaiting TA for final judgement." + decision_message
+            return error_message + message
+        return "All mandatory parts where found. Awaiting TA for final judgement." + message
     
         
     status = 'failure' if error_message else "success"
