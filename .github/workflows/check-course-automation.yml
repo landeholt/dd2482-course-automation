@@ -14,6 +14,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: 'Parsing markdown for mandatory part(s)'
-      uses: 'landeholt/dd2482-course-automation/action.yml'
+      uses: 'landeholt/dd2482-course-automation/action.yml@main'
       with:
         deadline: ${{ env.DEADLINE }}
