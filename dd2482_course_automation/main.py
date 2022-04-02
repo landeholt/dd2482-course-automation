@@ -80,14 +80,20 @@ class Markdown:
 
     def get_repos(self) -> list[tuple[str, str]]:
         return list(filter(lambda x: x[0] != "kth",GITHUB_URL.findall(self.raw.lower())))
-            
-        
+
+def get_tz():
+    return pytz.timezone(getenv("INPUT_TZ") or 'Europe/Stockholm')
+
+def localize(dt: datetime):
+    tz = get_tz()
+    
+    return tz.localize(dt)
 
 def parse_datetime_str(raw_datetime: str):
     try:
-        return pytz.utc.localize(datetime.strptime(raw_datetime, DATETIME_FORMAT))
+        return localize(datetime.strptime(raw_datetime, DATETIME_FORMAT))
     except Exception:
-        return datetime.strptime(raw_datetime, "%Y-%m-%dT%H:%M:%S%z")
+        return datetime.strptime(raw_datetime, "%Y-%m-%dT%H:%M:%S%z").astimezone(get_tz())
 
 def get_payload(path: Path) -> Payload:
     return json.loads(path.read_bytes())
