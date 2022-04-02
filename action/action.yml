@@ -8,11 +8,9 @@ inputs:
   event_path:
     description: 'github.event_path'
     required: true
-    default: ${{ github.event_path }}
   secret:
-    description: 'github.secret'
+    description: 'github.secrets'
     required: true
-    default: ${{ secrets.GITHUB_TOKEN }}
 
 
 runs:
