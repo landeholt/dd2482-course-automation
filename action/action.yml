@@ -16,7 +16,7 @@ inputs:
 runs:
   using: 'docker'
   image: 'Dockerfile'
-  args:
-    - ${{ inputs.deadline }}
-    - ${{ inputs.event_path }}
-    - ${{ inputs.secret }}
+  env:
+    INPUT_DEADLINE: ${{ inputs.deadline }}
+    INPUT_EVENT_PATH: ${{ inputs.event_path }}
+    INPUT_SECRET: ${{ inputs.secret }}
