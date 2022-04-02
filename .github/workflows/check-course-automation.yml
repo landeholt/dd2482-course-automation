@@ -13,11 +13,7 @@ jobs:
     runs-on: 'ubuntu-latest'
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python 3.9.10
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.9.10"
-        cache: 'pip'
-    - run: pip install dd2482-course-automation
     - name: 'Parsing markdown for mandatory part(s)'
-      run: "ddca --deadline='${{ env.DEADLINE }}' --event=${{ github.event_path }} --secret=${{ secrets.GITHUB_TOKEN }}"
+      uses: './action.yml'
+      with:
+        deadline: ${{ env.DEADLINE }}

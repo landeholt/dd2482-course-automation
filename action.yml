@@ -1,0 +1,24 @@
+# action.yml
+name: 'DD2482: MetaCA'
+description: 'Auto verify mandatory parts of course automation'
+inputs:
+  deadline:
+    description: 'deadline for first task'
+    required: true
+  event_path:
+    description: 'github.event_path'
+    required: true
+    default: ${{ github.event_path }}
+  secret:
+    description: 'github.secret'
+    required: true
+    default: ${{ github.secret }}
+
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.deadline }}
+    - ${{ inputs.event_path }}
+    - ${{ inputs.secret }}

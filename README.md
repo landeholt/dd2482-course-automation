@@ -1,5 +1,21 @@
 # Meta course-automation
 
+## Installment
+
+`pip install dd2482-course-automation`
+
+## Usage in your action workflow
+```yml
+...
+env:
+  DEADLINE: "2022-04-05T17:00:00Z"
+...
+steps:
+    - # setup python
+    - run: pip install dd2482-course-automation
+    - run: "ddca --deadline='${{ env.DEADLINE }}' --event=${{ github.event_path }} --secret=${{ secrets.GITHUB_TOKEN }}"
+```
+
 ## Takeaways
 
 - Github actions autoparses datetimes
