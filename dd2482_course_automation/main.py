@@ -206,7 +206,6 @@ def validate(deadline: datetime, payload: Payload, secret: Optional[str] = None)
     
     
     files = get_files(payload)
-    logger.warning(str(files))
     for f in files:
         if not f.is_empty():
             payload["__result__"]["files"].append(f)
