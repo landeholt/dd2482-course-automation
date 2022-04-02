@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dd2482-course-automation"
-version = "0.1.1"
+version = "0.1.2"
 description = ""
 authors = ["landeholt <johnlan@kth.se>"]
 

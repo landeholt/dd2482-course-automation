@@ -12,6 +12,7 @@ import sys
 import json
 import requests
 import base64
+from os import getenv
 from dd2482_course_automation.exceptions import AfterDeadlineError, AmbiguousRepoError, MissingRepoError, PrivateRepoError, UnclearPullRequest
 
 Payload = dict[str, Any]
@@ -338,9 +339,9 @@ def run(args: dict[str, str]):
 
 def cli():
     parser = argparse.ArgumentParser(description="automatic course-automation evaluator")
-    parser.add_argument('--deadline', dest="d",help="Deadline for the first task in the course")
-    parser.add_argument('--event', dest="e",help="Event path")
-    parser.add_argument('--secret', dest="s",help="Github secret")
+    parser.add_argument('--deadline', dest="d",help="Deadline for the first task in the course", default=getenv("INPUT_DEADLINE"))
+    parser.add_argument('--event', dest="e",help="Event path",default=getenv("INPUT_EVENT_PATH"))
+    parser.add_argument('--secret', dest="s",help="Github secret",default=getenv("INPUT_SECRET"))
     args = parser.parse_args()
     args = vars(args)
     
