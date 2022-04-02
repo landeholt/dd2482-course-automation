@@ -12,7 +12,7 @@ inputs:
   secret:
     description: 'github.secret'
     required: true
-    default: ${{ github.secret }}
+    default: ${{ secrets.GITHUB_TOKEN }}
 
 
 runs:
