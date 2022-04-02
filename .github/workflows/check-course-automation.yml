@@ -16,6 +16,6 @@ jobs:
     - name: 'Parsing markdown for mandatory part(s)'
       uses: 'landeholt/dd2482-course-automation/action@main'
       with:
-        deadline: ${{ env.DEADLINE }}
+        deadline: "${{ env.DEADLINE }}"
         event_path: ${{ github.event_path }}
         secret: ${{ secrets.GITHUB_TOKEN }}
