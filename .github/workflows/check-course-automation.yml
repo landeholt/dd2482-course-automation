@@ -14,7 +14,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: 'Parsing markdown for mandatory part(s)'
-      uses: 'landeholt/dd2482-course-automation/action@main'
+      uses: 'landeholt/dd2482-course-automation@main'
       with:
         deadline: ${{ env.DEADLINE }}
         event_path: ${{ github.event_path }}
