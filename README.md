@@ -1,18 +1,5 @@
 # Mandatory sanity checker
 
-## Rationale
-
-This is a github action that was developed for the DD2482 DevOps course @ KTH.
-
-The course is entirely situated on github, and is built up by performing 3-5 tasks from a pool of different categories. One of these topics are `course-automation`, which is the task this repository is for.
-
-Mandatory santity checker was created for the course, in the hopes of aiding the teaching assistants (TA) in their grading by automating the mandatory task requirements, which at the time was:
-
-- timeliness: the automation is done before the first task deadline (in order to be useful for the course)
-- repo: the code for the task is available in a public repo
-
-These two requirements could be tedious for the TA to check for each student submission and can be easily automated.
-
 ## Installment
 
 `pip install dd2482-course-automation`
@@ -61,7 +48,24 @@ jobs:
     -  MM is minutes
     -  SS is seconds
 
-## Possible outcomes [link](https://github.com/landeholt/dd2482-course-automation/pull/8)
+---- Course specific content below ----
+
+## Rationale
+
+This is a github action that was developed for the DD2482 DevOps course @ KTH.
+
+The course is entirely situated on github, and is built up by performing 3-5 tasks from a pool of different categories. One of these topics are `course-automation`, which is the task this repository is for.
+
+Mandatory santity checker was created for the course, in the hopes of aiding the teaching assistants (TA) in their grading by automating the mandatory task requirements, which at the time was:
+
+- timeliness: the automation is done before the first task deadline (in order to be useful for the course)
+- repo: the code for the task is available in a public repo
+
+These two requirements could be tedious for the TA to check for each student submission and can be easily automated.
+
+
+
+## Possible outcomes [[link]](https://github.com/landeholt/dd2482-course-automation/pull/8)
 
 Except for the excerpt below, the tests validates the different test cases.
 
