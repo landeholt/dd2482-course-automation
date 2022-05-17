@@ -61,7 +61,7 @@ jobs:
     -  MM is minutes
     -  SS is seconds
 
-## Test Validation [link](https://github.com/landeholt/dd2482-course-automation/pull/8)
+## Possible outcomes [link](https://github.com/landeholt/dd2482-course-automation/pull/8)
 
 Except for the excerpt below, the tests validates the different test cases.
 
