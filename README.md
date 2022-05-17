@@ -1,10 +1,29 @@
-# Meta course-automation
+# Mandatory sanity checker
+
+## Rationale
+
+This is a github action that was developed for the DD2482 DevOps course @ KTH.
+
+The course is entirely situated on github, and is built up by performing 3-5 tasks from a pool of different categories. One of these topics are `course-automation`, which is the task this repository is for.
+
+Mandatory santity checker was created for the course, in the hopes of aiding the teaching assistants (TA) in their grading by automating the mandatory task requirements, which at the time was:
+
+- timeliness: the automation is done before the first task deadline (in order to be useful for the course)
+- repo: the code for the task is available in a public repo
+
+These two requirements could be tedious for the TA to check for each student submission and can be easily automated.
 
 ## Installment
 
 `pip install dd2482-course-automation`
 
-## Usage in your action workflow
+Add it through GitHub Marketplace:
+[here](https://github.com/marketplace/actions/dd2482-metaca)
+
+## How to use
+
+from pip:
+
 ```yml
 ...
 env:
@@ -16,16 +35,38 @@ steps:
     - run: "ddca --deadline='${{ env.DEADLINE }}' --event=${{ github.event_path }} --secret=${{ secrets.GITHUB_TOKEN }}"
 ```
 
-## Takeaways
+from GitHub Action Marketplace:
 
-- Github actions autoparses datetimes
-- Fetches from `https://raw.githubusercontent.com` are cached with a duration or 300s (5min)
-  - This can be side-stepped by providing the SHA. `https://raw.githubusercontent.com/{owner}/{repo}/{sha}/{path}`
-- hidden characters are hell. `Especially \r.`
-- Github actions are nice
-- Its hard to debug, as the payload is like a blackbox. Should exist a tool to test actions locally. [Dagger](https://github.com/dagger/dagger) seems to have this feature.
+```yml
+env:
+  DEADLINE: "2022-04-05T17:00:00Z"
 
-## Validation [link](https://github.com/landeholt/dd2482-course-automation/pull/8)
+jobs:
+  steps:
+    - uses: actions/checkout@v2
+    - uses: landeholt/dd2482-course-automation@main
+      with:
+        deadline: ${{ env.DEADLINE }}
+        event_path: ${{ github.event_path }}
+        secret: ${{ secrets.GITHUB_TOKEN }}
+```
+## Inputs
+
+- DEADLINE: A datetime string on the format YYYY-mm-ddTHH:MM:SSZ
+  where 
+    -  YYYY is year,
+    -  mm is month (01-12), 
+    -  dd is day (01-31),
+    -  HH is hours
+    -  MM is minutes
+    -  SS is seconds
+
+## Test Validation [link](https://github.com/landeholt/dd2482-course-automation/pull/8)
+
+Except for the excerpt below, the tests validates the different test cases.
+
+Test the action via `pytest tests`
+
 1. A PR is valid when: it is `final_submission`, created/updated before deadline and contains a public repository link.
 
 > ## All mandatory parts were found. Awaiting TA for final judgement.
@@ -140,10 +181,10 @@ After that easy condition, it starts off fetching all changed files for the Pull
 When all files have been sourced, it starts of to look for a `stage`.
 
 A stage must be one of the following:
- 1. final
- 2. submission
- 3. proposal
- 4. final submission
+
+ 1. submission
+ 2. proposal
+ 3. final submission
 
 If no stage is found, it throws an error telling the author that it cannot determine what to evaluate.
 
@@ -159,4 +200,3 @@ that later on gets filtered further to remove repos that are owned by `KTH`.
 If it could not find any public repositories for the pull request, it throws an error explaining that it could not do that.
 
 When all checks have been processed, it begins to build the feedback.
-   
