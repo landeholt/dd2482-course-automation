@@ -1,15 +1,13 @@
 # Mandatory sanity checker
 
-## Installment
+This action is highly customized to be embedded in the KTH devops course. This implies that it probably won't have any value outside of said course.
 
+## Installment & how to use
+
+One can either directly install it from pypi with pip, or use it from GitHub Marketplace.
+
+### Pypi
 `pip install dd2482-course-automation`
-
-Add it through GitHub Marketplace:
-[here](https://github.com/marketplace/actions/dd2482-metaca)
-
-## How to use
-
-from pip:
 
 ```yml
 ...
@@ -22,7 +20,8 @@ steps:
     - run: "ddca --deadline='${{ env.DEADLINE }}' --event=${{ github.event_path }} --secret=${{ secrets.GITHUB_TOKEN }}"
 ```
 
-from GitHub Action Marketplace:
+### GitHub Marketplace
+[here](https://github.com/marketplace/actions/dd2482-metaca)
 
 ```yml
 env:
@@ -37,6 +36,7 @@ jobs:
         event_path: ${{ github.event_path }}
         secret: ${{ secrets.GITHUB_TOKEN }}
 ```
+
 ## Inputs
 
 - DEADLINE: A datetime string on the format YYYY-mm-ddTHH:MM:SSZ
@@ -47,6 +47,24 @@ jobs:
     -  HH is hours
     -  MM is minutes
     -  SS is seconds
+
+## How it works
+
+<img src="flow.png" width="100%"/>
+
+The action is built up in two steps. Validation and feedback, where validation checks for the creation and updation date that is received from the payload json-file. If the updation date is greater than the creation date, the updation date will be prioritized.
+
+After that it checks whether the prioritized date is greater than the suggested deadline date that comes from the environment. If it is greater, an exception is thrown to the feedback handler.
+
+After that the action further checks all the appended markdown files from the commit for the following:
+  - Whether its title contains Final, Proposal or Submission.
+  - Whether it contains a github repo link that isn't owned by KTH as well as being public
+
+If it finds a markdown file that contains both of these requirements, it will go ahead and validate the pull request by appending the results to the payload dictionary.
+
+Within the feedback section, the action will do three things. The first thing it does is to set the right label, meaning whether it is a submission or a proposal. Secondly, it sets a status to the specific workflow, such that there is a link between the pull request and its specific workflow result.
+
+Finally sends a comment to the pull request with the right feedback that comes from the validation part of the action. Here it will explain the result as shown in Possible outcomes below.
 
 ---- Course specific content below ----
 
