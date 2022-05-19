@@ -12,7 +12,6 @@ This action is highly customized to be embedded in the KTH devops course. This i
 - Added Inputs section, explaining what data is needed to make the action work as intented
 - Created a flowchart (figure) of the action and appended the illustration to the README
 - Published the action to Github Marketplace
-- 
 
 ## Installment & how to use
 
