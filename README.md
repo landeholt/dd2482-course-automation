@@ -1,12 +1,24 @@
-# Mandatory sanity checker
+# Mandatory sanity checker for DD2482
 
 This action is highly customized to be embedded in the KTH devops course. This implies that it probably won't have any value outside of said course.
+
+## Changelog
+
+- changed title from "Meta course-automation" to "Mandatory sanity checker for DD2482"
+- changed installation documentation separating the two registries (GH Marketplace & PyPi)
+- Removed takeaways, as it didn't provide any valuable insight to the project
+- Added a Rationale section, such that a background to the creation of this action is based on
+- Changed "Validation links" to "Possible outcomes"
+- Added Inputs section, explaining what data is needed to make the action work as intented
+- Created a flowchart (figure) of the action and appended the illustration to the README
+- Published the action to Github Marketplace
+- 
 
 ## Installment & how to use
 
 One can either directly install it from pypi with pip, or use it from GitHub Marketplace.
 
-### Pypi
+### PyPi
 `pip install dd2482-course-automation`
 
 ```yml
@@ -85,7 +97,7 @@ These two requirements could be tedious for the TA to check for each student sub
 
 ## Possible outcomes [[link]](https://github.com/landeholt/dd2482-course-automation/pull/8)
 
-Except for the excerpt below, the tests validates the different test cases.
+These are the following outcomes that can occur through the workflow. See the flowchart for details.
 
 Test the action via `pytest tests`
 
